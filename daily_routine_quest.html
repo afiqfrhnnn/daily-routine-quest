@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Routine Quest</title>
+<style>
+  :root {
+    --ink: #26324a;
+    --purple: #7667d9;
+    --pink: #ff91b5;
+    --yellow: #ffd86b;
+    --mint: #a8e6cf;
+    --blue: #a9d8ff;
+    --cream: #fffaf0;
+    --danger: #ef6c7b;
+    --shadow: 0 8px 0 rgba(38, 50, 74, .12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 10% 10%, #ffffffaa 0 5%, transparent 6%),
+      linear-gradient(135deg, #e6f4ff, #fff1f7 50%, #fff8d8);
+    min-height: 100vh;
+  }
+
+  button, input { font: inherit; }
+
+  button {
+    border: 0;
+    cursor: pointer;
+    transition: transform .15s ease, filter .15s ease;
+  }
+
+  button:hover { filter: brightness(1.03); transform: translateY(-2px); }
+  button:focus-visible, input:focus-visible { outline: 4px solid #4d9fff; outline-offset: 3px; }
+
+  .container { width: min(1050px, 92%); margin: 0 auto; }
+
+  header {
+    padding: 22px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+  }
+
+  .brand-icon { font-size: 2rem; }
+
+  .top-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+  .small-button, .primary-button, .secondary-button {
+    padding: 12px 17px;
+    border-radius: 999px;
+    font-weight: 800;
+    box-shadow: var(--shadow);
+  }
+
+  .small-button { background: white; color: var(--ink); }
+  .primary-button { background: var(--purple); color: white; }
+  .secondary-button { background: var(--yellow); color: var(--ink); }
+
+  .screen { display: none; padding: 20px 0 40px; }
+  .screen.active { display: block; }
+
+  .hero {
+    text-align: center;
+    padding: 28px 10px;
+  }
+
+  .hero h1 {
+    margin: 10px 0;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 1.05;
+  }
+
+  .hero p {
+    max-width: 650px;
+    margin: 0 auto 22px;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+  }
+
+  .cartoon-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    margin: 18px 0;
+  }
+
+  .bubble {
+    display: inline-block;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    font-weight: 800;
+  }
+
+  .panel {
+    background: #ffffffdc;
+    border: 3px solid #ffffff;
+    border-radius: 28px;
+    padding: clamp(18px, 4vw, 32px);
+    box-shadow: 0 12px 0 rgba(118, 103, 217, .10);
+    margin-bottom: 18px;
+  }
+
+  .name-form {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  label { display: block; font-weight: 900; margin-bottom: 7px; }
+
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 3px solid #d8d9f1;
+    border-radius: 15px;
+    background: white;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .center { text-align: center; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .stat {
+    background: white;
+    border-radius: 18px;
+    padding: 13px 8px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    font-weight: 900;
+  }
+
+  .stat span {
+    display: block;
+    font-size: .8rem;
+    opacity: .7;
+    margin-bottom: 3px;
+  }
+
+  .timer-track {
+    height: 13px;
+    background: #e8e8f5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 10px 0 20px;
+  }
+
+  #timerBar {
+    height: 100%;
+    width: 100%;
+    background: var(--mint);
+    transition: width 1s linear;
+  }
+
+  .question-number {
+    color: var(--purple);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  #questionText {
+    font-size: clamp(1.35rem, 4vw, 2rem);
+    margin: 10px 0 20px;
+  }
+
+  .picture {
+    min-height: 150px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #fff3c4, #e7f7ff);
+    border-radius: 24px;
+    border: 3px dashed #d7c9ff;
+    font-size: clamp(5rem, 16vw, 9rem);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .picture::before, .picture::after {
+    content: "";
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #ffffff75;
+  }
+
+  .picture::before { top: -20px; left: 10%; }
+  .picture::after { bottom: -25px; right: 8%; }
+
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .answer-button {
+    background: white;
+    color: var(--ink);
+    border: 3px solid #e4e2f5;
+    border-radius: 17px;
+    padding: 16px;
+    text-align: left;
+    font-weight: 800;
+    box-shadow: 0 5px 0 #e4e2f5;
+  }
+
+  .answer-button.correct {
+    background: #d7f8e8;
+    border-color: #66c999;
+    box-shadow: 0 5px 0 #66c999;
+  }
+
+  .answer-button.wrong {
+    background: #ffe0e5;
+    border-color: #ee8795;
+    box-shadow: 0 5px 0 #ee8795;
+  }
+
+  .answer-button:disabled { cursor: default; }
+
+  #feedback {
+    min-height: 28px;
+    text-align: center;
+    font-weight: 900;
+    margin: 18px 0 0;
+  }
+
+  .progress-track {
+    height: 12px;
+    background: #e7e4f7;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 10px 0 20px;
+  }
+
+  #progressBar {
+    height: 100%;
+    width: 0%;
+    background: var(--pink);
+    transition: width .25s ease;
+  }
+
+  .result-stars {
+    font-size: clamp(2rem, 8vw, 4rem);
+    letter-spacing: 5px;
+    margin: 14px 0;
+  }
+
+  .result-score { font-size: 2rem; font-weight: 900; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; }
+  th, td { padding: 12px; border-bottom: 1px solid #eceaf7; text-align: left; }
+  th { background: #f0edff; }
+  .empty { text-align: center; padding: 20px; opacity: .7; }
+
+  .notice {
+    background: #fff6d8;
+    border-left: 5px solid #f3bd35;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: .92rem;
+  }
+
+  .footer-note { text-align: center; font-size: .85rem; opacity: .7; margin: 25px 0; }
+
+  @media (min-width: 650px) {
+    .answers { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 520px) {
+    header { align-items: flex-start; flex-direction: column; }
+    .top-actions { justify-content: flex-start; }
+    .stats { gap: 7px; }
+    .stat { font-size: .9rem; }
+    .panel { border-radius: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand"><span class="brand-icon">🌞</span> Daily Routine Quest</div>
+    <div class="top-actions">
+      <button class="small-button" onclick="showScreen('home')">🏠 Home</button>
+      <button class="small-button" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      <button class="small-button" onclick="showTeacherPanel()">📊 Teacher</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="homeScreen" class="screen active">
+      <div class="hero">
+        <div class="cartoon-row" aria-label="Cartoon daily routine icons">
+          <span>🌅</span><span>🪥</span><span>🍞</span><span>🎒</span><span>🌙</span>
+        </div>
+        <span class="bubble">Learn • Play • Shine ⭐</span>
+        <h1>Daily Routine Quest!</h1>
+        <p>Explore everyday activities, answer the questions and collect stars. Are you ready, little learner?</p>
+      </div>
+
+      <div class="panel name-form">
+        <h2>👋 Let's get started!</h2>
+        <label for="playerName">What is your name?</label>
+        <input id="playerName" type="text" maxlength="30" placeholder="Type your name">
+        <button class="primary-button" style="width:100%" onclick="startGame()">Start Game 🚀</button>
+        <p class="footer-note">Suitable for Year 3 English learners.</p>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div class="stats">
+        <div class="stat"><span>QUESTION</span><strong id="questionCounter">1 / 10</strong></div>
+        <div class="stat"><span>SCORE</span><strong id="scoreValue">0</strong></div>
+        <div class="stat"><span>STARS</span><strong id="starsValue">☆☆☆</strong></div>
+      </div>
+
+      <div class="panel">
+        <div class="question-number" id="playerGreeting">Good luck!</div>
+        <div class="timer-track" aria-label="Time remaining"><div id="timerBar"></div></div>
+        <div class="center"><strong id="timerText">20 seconds</strong></div>
+        <div class="progress-track"><div id="progressBar"></div></div>
+
+        <div class="picture" id="picture" role="img" aria-label="Daily routine cartoon">🌅</div>
+        <div class="question-number" id="questionNumber">Question 1</div>
+        <h2 id="questionText">Question goes here</h2>
+        <div class="answers" id="answers"></div>
+        <p id="feedback" aria-live="polite"></p>
+      </div>
+
+      <div class="center">
+        <button class="secondary-button" onclick="restartGame()">🔄 Restart Game</button>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="panel center">
+        <div class="cartoon-row">🏆 🎉 🌟</div>
+        <h1 id="resultTitle">Well done!</h1>
+        <p id="resultMessage"></p>
+        <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+        <div class="result-score" id="finalScore">0 / 100</div>
+        <p id="resultDetails"></p>
+        <button class="primary-button" onclick="restartGame()">🔄 Play Again</button>
+        <button class="secondary-button" style="margin:10px" onclick="showLeaderboard()">🏆 View Leaderboard</button>
+      </div>
+    </section>
+
+    <section id="leaderboardScreen" class="screen">
+      <div class="panel">
+        <h1>🏆 Leaderboard</h1>
+        <p>Players' results saved on this device.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Stars</th></tr></thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+        <br>
+        <button class="secondary-button" onclick="showScreen('home')">🏠 Back Home</button>
+        <button class="small-button" onclick="clearLeaderboard()">Clear Results</button>
+      </div>
+    </section>
+
+    <section id="teacherScreen" class="screen">
+      <div class="panel">
+        <h1>📊 Teacher Progress Tracking</h1>
+        <p>Review recent quiz attempts saved in this browser.</p>
+        <div class="notice">
+          Privacy note: this demo stores results only in the browser's local storage. It does not send data to a school server or automatically combine results from different devices.
+        </div>
+        <br>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Score</th><th>Stars</th><th>Correct</th><th>Date</th></tr></thead>
+            <tbody id="teacherBody"></tbody>
+          </table>
+        </div>
+        <br>
+        <button class="secondary-button" onclick="exportResults()">⬇️ Export CSV</button>
+        <button class="small-button" onclick="showScreen('home')">🏠 Back Home</button>
+      </div>
+    </section>
+  </main>
+
+  <p class="footer-note">Created for classroom learning • Daily Routines • Year 3 ESL</p>
+</div>
+
+<script>
+const questions = [
+  { emoji: "🌅", question: "What do you do when you wake up?", answers: ["Go to bed", "Wake up", "Have dinner", "Go to school"], correct: 1, explanation: "We wake up in the morning." },
+  { emoji: "🪥", question: "What do you use to clean your teeth?", answers: ["A school bag", "A pillow", "A toothbrush", "A plate"], correct: 2, explanation: "We use a toothbrush to clean our teeth." },
+  { emoji: "🍞", question: "What do you usually have in the morning?", answers: ["Breakfast", "Dinner", "A bedtime story", "A shower at night"], correct: 0, explanation: "We usually have breakfast in the morning." },
+  { emoji: "🎒", question: "Where do you go to learn with your teacher?", answers: ["The bedroom", "The kitchen", "The bathroom", "School"], correct: 3, explanation: "We go to school to learn." },
+  { emoji: "🍱", question: "What do you eat in the middle of the day?", answers: ["Breakfast", "Lunch", "Dinner", "A snack before bed"], correct: 1, explanation: "We usually eat lunch in the middle of the day." },
+  { emoji: "⚽", question: "Which activity can you do after school?", answers: ["Play with friends", "Sleep until morning", "Brush your teeth only", "Wake up"], correct: 0, explanation: "We can play with friends after school." },
+  { emoji: "🍽️", question: "What do you usually eat in the evening?", answers: ["Breakfast", "Lunch", "Dinner", "A school lesson"], correct: 2, explanation: "We usually eat dinner in the evening." },
+  { emoji: "🚿", question: "Which activity helps you keep your body clean?", answers: ["Doing homework", "Taking a shower", "Going to school", "Reading a timetable"], correct: 1, explanation: "Taking a shower helps us keep our body clean." },
+  { emoji: "📚", question: "What can you do before going to bed?", answers: ["Read a book", "Go to school", "Eat breakfast", "Wake up"], correct: 0, explanation: "We can read a book before going to bed." },
+  { emoji: "🌙", question: "What do you do at night when you are tired?", answers: ["Go to sleep", "Have breakfast", "Go to school", "Wake up"], correct: 0, explanation: "We go to sleep at night when we are tired." }
+];
+
+const TIME_LIMIT = 20;
+let currentQuestion = 0;
+let score = 0;
+let correctCount = 0;
+let playerName = "";
+let timer = null;
+let timeLeft = TIME_LIMIT;
+let locked = false;
+
+function getResults() {
+  return JSON.parse(localStorage.getItem("dailyRoutineResults") || "[]");
+}
+
+function saveResults(result) {
+  const results = getResults();
+  results.push(result);
+  localStorage.setItem("dailyRoutineResults", JSON.stringify(results.slice(-100)));
+}
+
+function showScreen(name) {
+  document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+  const target = document.getElementById(name + "Screen");
+  if (target) target.classList.add("active");
+  stopTimer();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function startGame() {
+  const input = document.getElementById("playerName").value.trim();
+  playerName = input || "Guest";
+  currentQuestion = 0;
+  score = 0;
+  correctCount = 0;
+  showScreen("game");
+  document.getElementById("playerGreeting").textContent = "Good luck, " + playerName + "! 🌟";
+  showQuestion();
+}
+
+function showQuestion() {
+  locked = false;
+  const q = questions[currentQuestion];
+
+  document.getElementById("questionCounter").textContent = `${currentQuestion + 1} / ${questions.length}`;
+  document.getElementById("scoreValue").textContent = score;
+  document.getElementById("starsValue").textContent = getStars(score);
+  document.getElementById("questionNumber").textContent = "Question " + (currentQuestion + 1);
+  document.getElementById("questionText").textContent = q.question;
+
+  const picture = document.getElementById("picture");
+  picture.textContent = q.emoji;
+  picture.setAttribute("aria-label", "Cartoon illustration for the daily routine question");
+
+  document.getElementById("progressBar").style.width = (currentQuestion / questions.length * 100) + "%";
+  document.getElementById("feedback").textContent = "";
+
+  const answersBox = document.getElementById("answers");
+  answersBox.innerHTML = "";
+
+  q.answers.forEach((answer, index) => {
+    const button = document.createElement("button");
+    button.className = "answer-button";
+    button.textContent = String.fromCharCode(65 + index) + ". " + answer;
+    button.onclick = () => checkAnswer(index, button);
+    answersBox.appendChild(button);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  stopTimer();
+  timeLeft = TIME_LIMIT;
+  updateTimer();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      stopTimer();
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function updateTimer() {
+  document.getElementById("timerText").textContent = timeLeft + " seconds";
+  document.getElementById("timerBar").style.width = (timeLeft / TIME_LIMIT * 100) + "%";
+  document.getElementById("timerBar").style.background = timeLeft <= 5 ? "var(--danger)" : "var(--mint)";
+}
+
+function handleTimeout() {
+  if (locked) return;
+  locked = true;
+  document.getElementById("feedback").textContent = "⏰ Time's up! The next question is coming.";
+  document.querySelectorAll(".answer-button").forEach(button => button.disabled = true);
+  setTimeout(nextQuestion, 1300);
+}
+
+function checkAnswer(index, selectedButton) {
+  if (locked) return;
+  locked = true;
+  stopTimer();
+
+  const q = questions[currentQuestion];
+  const buttons = document.querySelectorAll(".answer-button");
+  buttons.forEach(button => button.disabled = true);
+
+  if (index === q.correct) {
+    score += 10;
+    correctCount++;
+    selectedButton.classList.add("correct");
+    document.getElementById("feedback").textContent = "🎉 Correct! " + q.explanation;
+  } else {
+    selectedButton.classList.add("wrong");
+    buttons[q.correct].classList.add("correct");
+    document.getElementById("feedback").textContent = "😊 Good try! " + q.explanation;
+  }
+
+  document.getElementById("scoreValue").textContent = score;
+  document.getElementById("starsValue").textContent = getStars(score);
+  setTimeout(nextQuestion, 1500);
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    finishGame();
+  }
+}
+
+function getStars(finalScore) {
+  if (finalScore >= 80) return "⭐⭐⭐";
+  if (finalScore >= 50) return "⭐⭐☆";
+  if (finalScore >= 20) return "⭐☆☆";
+  return "☆☆☆";
+}
+
+function finishGame() {
+  stopTimer();
+  const stars = getStars(score);
+  const result = {
+    name: playerName,
+    score: score,
+    stars: stars,
+    correct: correctCount,
+    total: questions.length,
+    date: new Date().toLocaleString()
+  };
+
+  saveResults(result);
+  document.getElementById("resultTitle").textContent = score >= 80 ? "Amazing work! 🎉" : "Well done, " + playerName + "!";
+  document.getElementById("resultMessage").textContent = "You completed the Daily Routine Quest.";
+  document.getElementById("resultStars").textContent = stars;
+  document.getElementById("finalScore").textContent = score + " / 100";
+  document.getElementById("resultDetails").textContent = "You answered " + correctCount + " out of " + questions.length + " questions correctly.";
+  showScreen("result");
+}
+
+function restartGame() {
+  stopTimer();
+  currentQuestion = 0;
+  score = 0;
+  correctCount = 0;
+  showScreen("home");
+}
+
+function showLeaderboard() {
+  const results = getResults().sort((a, b) => b.score - a.score).slice(0, 20);
+  const body = document.getElementById("leaderboardBody");
+  body.innerHTML = "";
+
+  if (!results.length) {
+    body.innerHTML = '<tr><td colspan="4" class="empty">No results yet. Play a game first!</td></tr>';
+  } else {
+    results.forEach((result, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${index + 1}</td><td>${escapeHtml(result.name)}</td><td>${result.score}</td><td>${result.stars}</td>`;
+      body.appendChild(row);
+    });
+  }
+
+  showScreen("leaderboard");
+}
+
+function showTeacherPanel() {
+  const results = getResults().slice().reverse();
+  const body = document.getElementById("teacherBody");
+  body.innerHTML = "";
+
+  if (!results.length) {
+    body.innerHTML = '<tr><td colspan="5" class="empty">No pupil attempts yet.</td></tr>';
+  } else {
+    results.forEach(result => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${escapeHtml(result.name)}</td><td>${result.score}</td><td>${result.stars}</td><td>${result.correct}/${result.total}</td><td>${escapeHtml(result.date)}</td>`;
+      body.appendChild(row);
+    });
+  }
+
+  showScreen("teacher");
+}
+
+function clearLeaderboard() {
+  if (confirm("Clear all saved results on this device?")) {
+    localStorage.removeItem("dailyRoutineResults");
+    showLeaderboard();
+  }
+}
+
+function exportResults() {
+  const results = getResults();
+  if (!results.length) {
+    alert("There are no results to export yet.");
+    return;
+  }
+
+  const headers = ["Name", "Score", "Stars", "Correct", "Total", "Date"];
+  const rows = results.map(r => [r.name, r.score, r.stars, r.correct, r.total, r.date]);
+  const csv = [headers, ...rows]
+    .map(row => row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(","))
+    .join("\n");
+
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "daily-routine-results.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[character]));
+}
+</script>
+</body>
+</html>
